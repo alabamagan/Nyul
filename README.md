@@ -3,6 +3,9 @@
 The class NyulNormalizer.py implements a method for intensity normalization 
 as explained in [1] and [2].
 
+The class is provided with a example that can be run straighforward: `python NyulNormalizer.py`.
+The 3 volumes provided as examples where extracted from [BRATS](http://braintumorsegmentation.org/) 2015 challenge.
+
 ## Dependences
 A few dependences are required by NyulNormalier:
 * Numpy (`pip install numpy`)
@@ -33,7 +36,12 @@ from NyulNormalizer import NyulNormalizer
 
 nyul = NyulNormalizer()
 nyul.loadTrainedModel('/path/to/saved/model.npz')
-nyul.transformImage('/path/to/image.nii.gz')
+
+image = sitk.ReadImage('/path/to/image')
+
+transformedImage = nyul.transform(image)
+
+sitk.WriteImage( transformedImage, './transformedImage.nii.gz' )
 ```
 
 ## References
