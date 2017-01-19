@@ -7,7 +7,7 @@ The class is provided with a example that can be run straighforward: `python Nyu
 The 3 volumes provided as examples were extracted from [BRATS](http://braintumorsegmentation.org/) 2015 challenge.
 
 ## Dependences
-A few dependences are required by NyulNormalier:
+A few dependences are required by NyulNormalizer:
 * Numpy (`pip install numpy`)
 * Scipy (`pip install scipy`)
 * Matplotlib (`pip install matplotlib`)
