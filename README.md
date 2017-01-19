@@ -4,7 +4,7 @@ The class NyulNormalizer.py implements a method for intensity normalization
 as explained in [1] and [2].
 
 The class is provided with a example that can be run straighforward: `python NyulNormalizer.py`.
-The 3 volumes provided as examples where extracted from [BRATS](http://braintumorsegmentation.org/) 2015 challenge.
+The 3 volumes provided as examples were extracted from [BRATS](http://braintumorsegmentation.org/) 2015 challenge.
 
 ## Dependences
 A few dependences are required by NyulNormalier:
