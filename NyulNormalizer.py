@@ -24,7 +24,12 @@ Created on Tue Aug 16 17:48:24 2016
 
 	nyul = NyulNormalizer()
 	nyul.loadTrainedModel('/path/to/saved/model.npz')
-        nyul.transformImage('/path/to/image')
+
+	image = sitk.ReadImage('/path/to/image')
+
+        transformedImage = nyul.transform(image)
+
+	sitk.WriteImage( transformedImage, './transformedImage.mha' )
 		
 @author: Enzo Ferrante
 """
@@ -190,7 +195,7 @@ class NyulNormalizer:
         """
             Train a new model for the given list of images. 
             
-            Note that the actual number of points is numPoints that will be generated (including
+            Note that the actual number of points that will be generated (including
             the landmarks corresponding to pLow and pHigh) is numPoints + 1.
             
             Recommended values fro numPoints are 10 and 4.
@@ -290,7 +295,7 @@ class NyulNormalizer:
         self.__landmarksSanityCheck(self.meanLandmarks)
 
                 
-    def transform(self, image, parallel=True):
+    def transform(self, image):
         """
             It transforms the image to the learned standard scale
             and returns it as a SimpleITK image.
@@ -373,12 +378,11 @@ class NyulNormalizer:
         
         return output
 
-"""        
 if __name__ == "__main__":
 	# ----- Training -----
     
-        listFiles = ['/path/to/MRI_file1', '/path/to/MRI_file2', ... '/path/to/MRI_fileN']        
-        outputModel = '/path/to/outputModel'
+        listFiles = ['./data/VSD.Brain.XX.O.MR_Flair.40831.mha', './data/VSD.Brain.XX.O.MR_Flair.40939.mha', './data/VSD.Brain.XX.O.MR_Flair.54644.mha']        
+        outputModel = './nyulModel'
         
         nyul = NyulNormalizer()
         
@@ -387,8 +391,11 @@ if __name__ == "__main__":
 
 	# ----- Transforming images -----
 
-        nyul.transformImage('/path/to/MRI_file1')
+	image = sitk.ReadImage('./data/VSD.Brain.XX.O.MR_Flair.40831.mha')
 
-"""
+        transformedImage = nyul.transform(image)
+	
+	sitk.WriteImage( transformedImage, './transformedImage.mha' )
+
     
 
