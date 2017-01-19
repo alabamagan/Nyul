@@ -38,6 +38,6 @@ nyul.transformImage('/path/to/image.nii.gz')
 
 ## References
 
-**[1]** Nyúl, László G., and Jayaram K. Udupa. "On standardizing the MR image intensity scale." image 1081 (1999).
+**[1]** Nyúl, László G., and Jayaram K. Udupa. ["On standardizing the MR image intensity scale"](https://www.ncbi.nlm.nih.gov/pubmed/10571928) Magn Reson Med. (1999) Dec;42(6):1072-81.
 
-**[2]** Shah, Mohak, et al. "Evaluating intensity normalization on MRIs of human brain with multiple sclerosis." Medical image analysis 15.2 (2011): 267-282.
+**[2]** Shah, Mohak, et al. ["Evaluating intensity normalization on MRIs of human brain with multiple sclerosis"](http://www.sciencedirect.com/science/article/pii/S1361841510001337) Medical image analysis 15.2 (2011): 267-282.
