@@ -1,11 +1,14 @@
 # Nyul Normalizer
 
-The class NyulNormalizer.py implements 
+The class NyulNormalizer.py implements a method for intensity normalization 
+as explained in [1] and [2].
 
 ## Dependences
 A few dependences are required by NyulNormalier:
-* Numpy
-* SimpleITK
+* Numpy (`pip install numpy`)
+* Scipy (`pip install scipy`)
+* Matplotlib (`pip install matplotlib`)
+* SimpleITK (`pip install SimpleITK`)
 
 ## Example
 Nyul normalization consists in two steps: training and transforming.
@@ -32,3 +35,8 @@ nyul = NyulNormalizer()
 nyul.loadTrainedModel('/path/to/saved/model.npz')
 nyul.transformImage('/path/to/image.nii.gz')
 ```
+
+## References
+
+**[1]** Nyúl, László G., and Jayaram K. Udupa. "On standardizing the MR image intensity scale." image 1081 (1999).
+**[2]** Shah, Mohak, et al. "Evaluating intensity normalization on MRIs of human brain with multiple sclerosis." Medical image analysis 15.2 (2011): 267-282.
