@@ -3,7 +3,7 @@
 The class NyulNormalizer.py implements a method for intensity normalization 
 as explained in [1] and [2].
 
-The class is provided with a example that can be run straighforward: `python NyulNormalizer.py`.
+The class is provided with an example that can be run straighforward: `python NyulNormalizer.py`.
 The 3 volumes provided as examples where extracted from [BRATS](http://braintumorsegmentation.org/) 2015 challenge.
 
 ## Dependences
@@ -21,11 +21,12 @@ During training, the histogram parameters are learned from the training images.
 from NyulNormalizer import NyulNormalizer
 
 listFiles = ['/path/to/MRI_file1.nii.gz', '/path/to/MRI_file2.nii.gz', ... '/path/to/MRI_fileN.nii.gz']
+listMasks = ['/path/to/MRI_file1_brainmask.nii.gz', '/path/to/MRI_file2_brainmask.nii.gz', ... '/path/to/MRI_fileN_brainmask.nii.gz']
 outputModel = '/path/to/outputModel'
         
 nyul = NyulNormalizer()
         
-nyul.train(listFiles)
+nyul.train(listFiles, listMasks) # listMasks is optional
 nyul.saveTrainedModel(outputModel)
 ```
 
@@ -38,8 +39,9 @@ nyul = NyulNormalizer()
 nyul.loadTrainedModel('/path/to/saved/model.npz')
 
 image = sitk.ReadImage('/path/to/image')
+mask = image = sitk.ReadImage('/path/to/image_mask')
 
-transformedImage = nyul.transform(image)
+transformedImage = nyul.transform(image, mask) # mask is optional
 
 sitk.WriteImage( transformedImage, './transformedImage.nii.gz' )
 ```
