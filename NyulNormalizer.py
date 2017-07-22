@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Aug 16 17:48:24 2016
+Last update: 22/07/2017
 
     This class implements the Nyul two steps normalization method as explained in:
     
@@ -12,24 +13,26 @@ Created on Tue Aug 16 17:48:24 2016
 
 	----- Training -----
     
-        listFiles = ['/path/to/MRI_file1', '/path/to/MRI_file2', ... '/path/to/MRI_fileN']        
-        outputModel = '/path/to/outputModel'
-        
-        nyul = NyulNormalizer()
-        
-        nyul.train(listFiles)
-        nyul.saveTrainedModel(outputModel)
+	listFiles = ['/path/to/MRI_file1.nii.gz', '/path/to/MRI_file2.nii.gz', ... '/path/to/MRI_fileN.nii.gz']
+	listMasks = ['/path/to/MRI_file1_brainmask.nii.gz', '/path/to/MRI_file2_brainmask.nii.gz', ... '/path/to/MRI_fileN_brainmask.nii.gz']
+	outputModel = '/path/to/outputModel'
+	
+	nyul = NyulNormalizer()
+	
+	nyul.train( listFiles, listMasks ) # listMasks is optional
+	nyul.saveTrainedModel( outputModel )
 
 	----- Transforming images -----
 
 	nyul = NyulNormalizer()
-	nyul.loadTrainedModel('/path/to/saved/model.npz')
+	nyul.loadTrainedModel( '/path/to/saved/model.npz' )
 
-	image = sitk.ReadImage('/path/to/image')
+	image = sitk.ReadImage( '/path/to/image' )
+	mask = image = sitk.ReadImage( '/path/to/image_mask' )
 
-        transformedImage = nyul.transform(image)
+	transformedImage = nyul.transform( image, mask ) # mask is optional
 
-	sitk.WriteImage( transformedImage, './transformedImage.mha' )
+	sitk.WriteImage( transformedImage, './transformedImage.nii.gz' )
 		
 @author: Enzo Ferrante
 """
