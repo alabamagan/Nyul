@@ -43,7 +43,9 @@ import time
 import SimpleITK as sitk
 import numpy as np
 import matplotlib.pyplot as plt
+import multiprocessing as mpi
 from scipy.interpolate import interp1d
+from tqdm import *
 
 # ********************************************************
 # ************* Auxiliar functions ***********************
@@ -93,9 +95,9 @@ def tic():
 
 def toc():
     if 'startTime_for_tictoc' in globals():
-        print "Elapsed time is " + str(time.time() - startTime_for_tictoc) + " seconds."
+        print("Elapsed time is " + str(time.time() - startTime_for_tictoc) + " seconds.")
     else:
-        print "Toc: start time not set"
+        print("Toc: start time not set")
 
 # ********************************************************
 # ************* NyulNormalizer class *********************
@@ -169,7 +171,7 @@ class NyulNormalizer:
 
         if showLandmarks:            
             yCoord = max(histo)
-            print landmarks
+            print(landmarks)
             plt.figure(dpi=100)
             plt.plot(bins[:-1],histo)
             plt.plot([landmarks[0], landmarks[-1]], [yCoord, yCoord] ,'r^')    
@@ -184,7 +186,7 @@ class NyulNormalizer:
                 if landmarks[i] == landmarks[i+1]:
                     landmarks[i] = (landmarks[i-1] + landmarks[i+1]) / 2.0
 
-                print "WARNING: Fixing duplicate landmark."
+                print("WARNING: Fixing duplicate landmark.")
 
             if not (np.unique(landmarks).size == len(landmarks)):
                 raise Exception('ERROR NyulNormalizer landmarks sanity check : One of the landmarks is duplicate. You can try increasing the number of bins in the histogram \
@@ -240,7 +242,7 @@ class NyulNormalizer:
         # For each image in the training set
         for fNameIndex in range(len(listOfImages)):
             fName = listOfImages[fNameIndex]
-            print "Processing: " + fName
+            print("Processing: " + fName)
             # Read the image
             image = sitk.ReadImage(fName)
 
@@ -263,16 +265,16 @@ class NyulNormalizer:
             # Add the mapped landmarks to the working set
             allMappedLandmarks.append(mappedLandmarks)
                 
-        print "ALL MAPPED LANDMARKS: "
-        print allMappedLandmarks
+        print("ALL MAPPED LANDMARKS: ")
+        print(allMappedLandmarks)
         
         self.meanLandmarks = np.array(allMappedLandmarks).mean(axis=0)
         
         # Check the obtained landmarks ...
         self.__landmarksSanityCheck(self.meanLandmarks)
 
-        print "MEAN LANDMARKS: "
-        print self.meanLandmarks
+        print("MEAN LANDMARKS: ")
+        print(self.meanLandmarks)
         
     def saveTrainedModel(self, location):
         """
@@ -294,7 +296,7 @@ class NyulNormalizer:
         }
             
         np.savez(location, trainedModel = [trainedModel])
-        print "Model saved at: " + location
+        print("Model saved at: " + location)
         
     def loadTrainedModel(self, savedModel):
         """
@@ -340,95 +342,118 @@ class NyulNormalizer:
         # Get the raw data of the image
         data = sitk.GetArrayFromImage( image )
         
-        # Calculate useful statistics            
+        # Calculate useful statistics
         stats = sitk.StatisticsImageFilter()
         stats.Execute( image )
-        
+
         # Obtain the minimum
         origMin = stats.GetMinimum()
         origMax = stats.GetMaximum()
         origMean = stats.GetMean()
         origVariance= stats.GetVariance()
-        
-        print "Input stats:"
-        print "Min = " + str(origMin)
-        print "Max = " + str(origMax)
-        print "Mean = " + str(origMean)
-        print "Variance = " + str(origVariance)
-        
+
+        print("Input stats:")
+        print("Min = " + str(origMin))
+        print("Max = " + str(origMax))
+        print("Mean = " + str(origMean))
+        print("Variance = " + str(origVariance))
+
         # Get the landmarks for the current image
         landmarks = self.__getLandmarks(image, mask)
         landmarks = np.array(landmarks)
 
         # Check the obtained landmarks ...
         self.__landmarksSanityCheck(landmarks)
-        
+
         # Recover the standard scale landmarks
         standardScale = self.meanLandmarks
-        
-        print "Image landmarks: " + str(landmarks)
-        print "Standard scale : " + str(standardScale)
-        
+
+        print("Image landmarks: " + str(landmarks))
+        print("Standard scale : " + str(standardScale))
+
         # Construct the piecewise linear interpolator to map the landmarks to the standard scale
         mapping = interp1d(landmarks, standardScale, fill_value="extrapolate")
 
         # Map the input image to the standard space using the piecewise linear function
-        
-        flatData = data.ravel()        
+
+        flatData = data.ravel()
         tic()
         mappedData = mapping(flatData)
         toc()
         mappedData = mappedData.reshape(data.shape)
-    
-        # Save edited data    
+
+        # Save edited data
         output = sitk.GetImageFromArray( mappedData )
         output.SetSpacing( image.GetSpacing() )
         output.SetOrigin( image.GetOrigin() )
         output.SetDirection( image.GetDirection() )
-        
-        # Calculate useful statistics            
+
+        # Calculate useful statistics
         stats = sitk.StatisticsImageFilter()
         stats.Execute( output )
-        
-        print "Output stats"
+
+        print("Output stats")
 
         # Obtain the minimum
         origMin = stats.GetMinimum()
         origMax = stats.GetMaximum()
         origMean = stats.GetMean()
         origVariance= stats.GetVariance()
-        
-        print "Min = " + str(origMin)
-        print "Max = " + str(origMax)
-        print "Mean = " + str(origMean)
-        print "Variance = " + str(origVariance)        
-        
+
+        print("Min = " + str(origMin))
+        print("Max = " + str(origMax))
+        print("Mean = " + str(origMean))
+        print("Variance = " + str(origVariance))
+
         return output
 
-if __name__ == "__main__":
-	# ----- Training -----
-    
-        listFiles = ['./data/VSD.Brain.XX.O.MR_Flair.40831.nii.gz', './data/VSD.Brain.XX.O.MR_Flair.40939.nii.gz', './data/VSD.Brain.XX.O.MR_Flair.54644.nii.gz']        
-        listMasks = ['./data/VSD.Brain.XX.O.MR_Flair.40831_brainmask.nii.gz', './data/VSD.Brain.XX.O.MR_Flair.40939_brainmask.nii.gz', './data/VSD.Brain.XX.O.MR_Flair.54644_brainmask.nii.gz']        
-        outputModel = './nyulModel'
-        
-        nyul = NyulNormalizer()
-        
-        nyul.train(listOfImages = listFiles, listOfMasks = listMasks)
-        nyul.saveTrainedModel(outputModel)
 
-	# ----- Transforming images -----
-	testImg = listFiles[0]
-	testImgMask = listMasks[0] 
+def transform_image(inputFile, outputFile, transform_file):
+    nyul = NyulNormalizer()
+    inImg = sitk.ReadImage(inputFile)
 
-	image = sitk.ReadImage(testImg)
-	mask = sitk.ReadImage(testImgMask)
+    outImg = nyul.transform(inImg, transform_file)
+    sitk.WriteImage(outImg, outputFile)
+    return 0
 
-        transformedImage = nyul.transform(image, mask)
-	
-	sitk.WriteImage( transformedImage, './transformedImage.nii.gz' )
 
-	print "DONE"
+def nyul(inputList, outputdir, transform_file=''):
+    """
+        Transform all files input with nyul normalization and save the result to the specified
+        output dir.
 
-    
+        :param list inputList: A list of absolute path to the target files
+        :param str outputdir: A str to the desired output path, will be created if not exist.
+        :param str transform_file: Path of the transform file, load if exist, created if not. Default named as nyul_transform.npz in your outputdir.
+        :return:
+    """
+    # check if inputList exist
+    not_exist = [not os.path.isfile(l) for l in inputList]
+    # assert not all(not_exist), "Can't find the followings: " + ','.join(np.array(inputList)[not_exist])
+    #
+    if transform_file == '':
+        transform_file = 'nyul_transform.npz'
 
+    if not os.path.isdir(outputdir):
+        os.makedirs(outputdir, exist_ok=True)
+
+    nyul = NyulNormalizer()
+    if not os.path.isfile(transform_file):
+        nyul.train(inputList)
+        nyul.saveTrainedModel(os.path.join(outputdir, transform_file))
+
+
+    for l in tqdm(inputList):
+        bname = os.path.basename(l)
+        outDir = os.path.join(outputdir, bname)
+        transform_image(l, outDir,os.path.join(outputdir, transform_file))
+
+if __name__ == '__main__':
+    inputdir = '/media/storage/Data/NPC_Segmentation/0A.NIFTI_ALL/Malignant/T2WFS_TRA'
+    inputfiles = os.listdir(inputdir)
+    inputfiles.sort()
+    inputfiles = [os.path.join(inputdir, dd) for dd in inputfiles]
+
+    outputdir = '/media/storage/Data/NPC_Segmentation/0A.NIFTI_ALL/Nyul_Normed/T2WFS_TRA'
+
+    nyul(inputfiles, outputdir)
