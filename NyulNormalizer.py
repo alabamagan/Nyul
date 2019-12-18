@@ -81,7 +81,7 @@ def getPercentile(cdf, bins, perc):
             print "Bin = " + str(bin)
         
     """
-    b = len(bins[cdf <= perc])
+    b = len(bins[1:][cdf <= perc])
     return bins[b] + ( (bins[1] - bins[0]) / 2), b
 
 def ensureDir(f):
@@ -306,7 +306,7 @@ class NyulNormalizer:
 
             :param savedModel Absolute path (including extension) to the "npz" file with the corresponding learned landmarks.
         """
-        f = np.load(savedModel)
+        f = np.load(savedModel, allow_pickle=True)
         tModel = f['trainedModel'].all()
         
         self.pLow = tModel['pLow']
@@ -410,9 +410,10 @@ class NyulNormalizer:
 
 def transform_image(inputFile, outputFile, transform_file):
     nyul = NyulNormalizer()
+    nyul.loadTrainedModel(transform_file)
     inImg = sitk.ReadImage(inputFile)
 
-    outImg = nyul.transform(inImg, transform_file)
+    outImg = nyul.transform(inImg)
     sitk.WriteImage(outImg, outputFile)
     return 0
 
@@ -449,11 +450,12 @@ def nyul(inputList, outputdir, transform_file=''):
         transform_image(l, outDir,os.path.join(outputdir, transform_file))
 
 if __name__ == '__main__':
-    inputdir = '/media/storage/Data/NPC_Segmentation/0A.NIFTI_ALL/Malignant/T2WFS_TRA'
+    inputdir = '/media/storage/Data/NPC_Segmentation/0A.NIFTI_ALL/Malignant/CE-T1W_TRA'
     inputfiles = os.listdir(inputdir)
     inputfiles.sort()
     inputfiles = [os.path.join(inputdir, dd) for dd in inputfiles]
 
-    outputdir = '/media/storage/Data/NPC_Segmentation/0A.NIFTI_ALL/Nyul_Normed/T2WFS_TRA'
+    outputdir = '/media/storage/Data/NPC_Segmentation/0A.NIFTI_ALL/Nyul_Normed/CE-T1W_TRA'
+    transform_file = os.path.join(outputdir, 'CE-T1W_TRA_nyul.npz')
 
-    nyul(inputfiles, outputdir)
+    nyul(inputfiles, outputdir, transform_file)
