@@ -449,3 +449,17 @@ def nyul(inputList, outputdir, transform_file=''):
         outDir = os.path.join(outputdir, bname)
         transform_image(l, outDir,os.path.join(outputdir, transform_file))
 
+if __name__ == '__main__':
+    import fnmatch
+    # inputdir = '/media/storage/Data/NPC_Segmentation/0A.NIFTI_ALL/Malignant/CE-T1W_TRA'
+    inputdir = '/home/lwong/Source/Repos/NPC_Segmentation/NPC_Segmentation/42.Benign_Malignant_Upright/'
+    inputfiles = os.listdir(inputdir)
+    inputfiles = fnmatch.filter(inputfiles, '*nii.gz')
+    inputfiles.sort()
+    inputfiles = [os.path.join(inputdir, dd) for dd in inputfiles]
+
+    # outputdir = '/media/storage/Data/NPC_Segmentation/0A.NIFTI_ALL/Nyul_Normed/CE-T1W_TRA'
+    outputdir = '/home/lwong/Source/Repos/NPC_Segmentation/NPC_Segmentation/42.Benign_Malignant_Upright/nyul_normed'
+    transform_file = os.path.join(outputdir, 'nyul.npz')
+
+    nyul(inputfiles, outputdir, transform_file)
